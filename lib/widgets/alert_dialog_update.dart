@@ -62,39 +62,70 @@ class UpdateVersionDialog extends Container {
       actions: [
         mandatory && !updated
             ? const SizedBox.shrink()
-            : TextButton(
-                style: cancelButtonStyle,
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  cancelButtonText!,
-                  style: cancelTextStyle,
+            : GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  height: 52,
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFF6C018A)),
+                    borderRadius: BorderRadius.circular(8)
+                  ),
+                  child: Center(
+                    child: Text(
+                      cancelButtonText!,
+                      style: const TextStyle(
+                        color: Color(0xFF6c018A), fontWeight: FontWeight.w600, fontSize: 14,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-        TextButton(
-          style: updateButtonStyle,
-          onPressed: () async {
-            await launchUrl(
-              Uri.parse(
-                appVersionResult!.storeUrl!,
+              GestureDetector(
+                onTap: () async {
+                  await launchUrl(
+                    Uri.parse(
+                      appVersionResult!.storeUrl!,
+                    ),
+                    mode: LaunchMode.externalApplication,
+                  );
+                  if (mandatory && !updated) {
+                    await AppVersionUpdate.checkForUpdates(
+                      appleId: appVersionResult!.appleId,
+                      playStoreId: appVersionResult!.playStoreId,
+                    ).then((checkIfUpdated) {
+                      if (!checkIfUpdated.canUpdate!) {
+                        updated = true;
+                      }
+                    });
+                  }
+                },
+                child: Container(
+                    height: 52,
+                    width: MediaQuery.of(context).size.width * 0.45,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                         Color(0xFF6C018A),
+                         Color(0xFF00183C),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        updateButtonText!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFFFFFFFF),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
               ),
-              mode: LaunchMode.externalApplication,
-            );
-            if (mandatory && !updated) {
-              await AppVersionUpdate.checkForUpdates(
-                appleId: appVersionResult!.appleId,
-                playStoreId: appVersionResult!.playStoreId,
-              ).then((checkIfUpdated) {
-                if (!checkIfUpdated.canUpdate!) {
-                  updated = true;
-                }
-              });
-            }
-          },
-          child: Text(
-            updateButtonText!,
-            style: updateTextStyle,
-          ),
-        )
       ],
     );
   }
