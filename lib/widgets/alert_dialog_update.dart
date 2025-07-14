@@ -60,9 +60,13 @@ class UpdateVersionDialog extends Container {
             ),
       ),
       actions: [
-        mandatory && !updated
-            ? const SizedBox.shrink()
-            : GestureDetector(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: mandatory && !updated
+              ? const SizedBox.shrink()
+              : GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
                   height: 52,
@@ -81,51 +85,57 @@ class UpdateVersionDialog extends Container {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () async {
-                  await launchUrl(
-                    Uri.parse(
-                      appVersionResult!.storeUrl!,
-                    ),
-                    mode: LaunchMode.externalApplication,
-                  );
-                  if (mandatory && !updated) {
-                    await AppVersionUpdate.checkForUpdates(
-                      appleId: appVersionResult!.appleId,
-                      playStoreId: appVersionResult!.playStoreId,
-                    ).then((checkIfUpdated) {
-                      if (!checkIfUpdated.canUpdate!) {
-                        updated = true;
-                      }
-                    });
+            ),
+          ],
+        ),
+        SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+        Expanded(
+          child: GestureDetector(
+            onTap: () async {
+              await launchUrl(
+                Uri.parse(
+                  appVersionResult!.storeUrl!,
+                ),
+                mode: LaunchMode.externalApplication,
+              );
+              if (mandatory && !updated) {
+                await AppVersionUpdate.checkForUpdates(
+                  appleId: appVersionResult!.appleId,
+                  playStoreId: appVersionResult!.playStoreId,
+                ).then((checkIfUpdated) {
+                  if (!checkIfUpdated.canUpdate!) {
+                    updated = true;
                   }
-                },
-                child: Container(
-                    height: 52,
-                    width: MediaQuery.of(context).size.width * 0.45,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                         Color(0xFF6C018A),
-                         Color(0xFF00183C),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        updateButtonText!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFFFFFFF),
-                          fontSize: 16,
-                        ),
-                      ),
+                });
+              }
+            },
+            child: Container(
+                height: 52,
+                width: MediaQuery.of(context).size.width * 0.45,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Color(0xFF6C018A),
+                      Color(0xFF00183C),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    updateButtonText!,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 16,
                     ),
                   ),
+                ),
               ),
+          ),
+        ),
       ],
     );
   }
