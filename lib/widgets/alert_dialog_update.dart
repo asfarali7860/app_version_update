@@ -42,6 +42,9 @@ class UpdateVersionDialog extends Container {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: backgroundColor!,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       title: Text(
         title!,
         style: titleTextStyle ??
@@ -61,25 +64,70 @@ class UpdateVersionDialog extends Container {
       ),
       actions: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            if (!(mandatory && !updated))
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFF6C018A)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        cancelButtonText!,
+                        style: const TextStyle(
+                          color: Color(0xFF6c018A),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (!(mandatory && !updated))
+              const SizedBox(width: 12),
             Expanded(
-              child: mandatory && !updated
-              ? const SizedBox.shrink()
-              : GestureDetector(
-                onTap: () => Navigator.pop(context),
+              child: GestureDetector(
+                onTap: () async {
+                  await launchUrl(
+                    Uri.parse(appVersionResult!.storeUrl!),
+                    mode: LaunchMode.externalApplication,
+                  );
+                  if (mandatory && !updated) {
+                    await AppVersionUpdate.checkForUpdates(
+                      appleId: appVersionResult!.appleId,
+                      playStoreId: appVersionResult!.playStoreId,
+                    ).then((checkIfUpdated) {
+                      if (!checkIfUpdated.canUpdate!) {
+                        updated = true;
+                      }
+                    });
+                  }
+                },
                 child: Container(
                   height: 52,
-                  width: MediaQuery.of(context).size.width * 0.45,
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFF6C018A)),
-                    borderRadius: BorderRadius.circular(8)
+                    gradient: const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Color(0xFF6C018A),
+                        Color(0xFF00183C),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
-                      cancelButtonText!,
+                      updateButtonText!,
                       style: const TextStyle(
-                        color: Color(0xFF6c018A), fontWeight: FontWeight.w600, fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -87,54 +135,6 @@ class UpdateVersionDialog extends Container {
               ),
             ),
           ],
-        ),
-        SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-        Expanded(
-          child: GestureDetector(
-            onTap: () async {
-              await launchUrl(
-                Uri.parse(
-                  appVersionResult!.storeUrl!,
-                ),
-                mode: LaunchMode.externalApplication,
-              );
-              if (mandatory && !updated) {
-                await AppVersionUpdate.checkForUpdates(
-                  appleId: appVersionResult!.appleId,
-                  playStoreId: appVersionResult!.playStoreId,
-                ).then((checkIfUpdated) {
-                  if (!checkIfUpdated.canUpdate!) {
-                    updated = true;
-                  }
-                });
-              }
-            },
-            child: Container(
-                height: 52,
-                width: MediaQuery.of(context).size.width * 0.45,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Color(0xFF6C018A),
-                      Color(0xFF00183C),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    updateButtonText!,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFFFFFFF),
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
-          ),
         ),
       ],
     );
